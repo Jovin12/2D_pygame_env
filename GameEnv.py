@@ -3,6 +3,7 @@ import random
 import gymnasium as gym
 from gymnasium import spaces
 import numpy as np
+import torch
 
 pygame.init()
 
@@ -62,8 +63,8 @@ class GameEnv(gym.Env):
 
         self.action_space = spaces.Discrete(3)
 
-        self.observation_space = spaces.Box(low=np.array([0, 0, -750, 0, 1]),
-                                            high=np.array([width, width, height, 1, 3]),
+        self.observation_space = spaces.Box(low=np.array([0, 0, 0, 0, 1]),
+                                            high=np.array([800, 800, 1350, 1, 3]),
                                             dtype=np.float32)
 
         self.width = width
@@ -87,7 +88,11 @@ class GameEnv(gym.Env):
         self.reset()
 
     def _get_obs(self):
-        return np.array([self.x, self.obs_x, self.obs_y, self.enemy, self.bg_state], dtype=np.float32)
+        # Add 750 to obs_y to make it non-negative
+        # Original range: -750 to height -> New range: 0 to height+750
+        normalized_obs_y = self.obs_y + 750
+        return torch.tensor([self.x, self.obs_x, normalized_obs_y, self.enemy, self.bg_state], dtype=torch.float32)
+
 
     def _get_reward(self):
         reward = 0.1
@@ -137,7 +142,7 @@ class GameEnv(gym.Env):
 
         self._render_frame()
 
-        return observation, reward, terminated, truncated, info
+        return observation, reward, terminated, info
 
     def reset(self, seed=None, options=None):
         super().reset(seed=seed)
@@ -188,7 +193,7 @@ if __name__ == '__main__':
 
     while not terminated and not truncated:
         action = env.action_space.sample()
-        new_observation, reward, terminated, truncated, info = env.step(action)
+        new_observation, reward, terminated, info = env.step(action)
         print(f"Observation: {new_observation}, Reward: {reward}, Terminated: {terminated}")
         env.render()
         clock.tick(30)

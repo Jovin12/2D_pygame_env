@@ -1,0 +1,30 @@
+# Bytecode files
+*.pyc
+__pycache__
+
+# Virtual environment
+venv/
+env/
+.venv/
+.env/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Log files
+*.log
+
+# Temporary files
+*.tmp
+temp/
+tmp/
+
+# TensorFlow checkpoint files
+checkpoint
+*.ckpt
+*.meta
+*.index
+*.h5
+
+rstdp.py
